@@ -42,8 +42,8 @@ let s:guifgs = exists('g:rainbow_guifgs')? g:rainbow_guifgs : [
             "\ 'DarkOrange3', 'FireBrick',
 
 let s:ctermfgs = exists('g:rainbow_ctermfgs')? g:rainbow_ctermfgs : [
-            \ 'darkgray', 'Darkblue', 'darkmagenta',
-            \ 'darkcyan', 'darkred', 'darkgreen',
+            \ 'darkmagenta', 'darkgreen', 'darkblue',
+            \ 'darkcyan', 'darkred', 'darkgray',
             \ ]
 
 let s:max = has('gui_running')? len(s:guifgs) : len(s:ctermfgs)
@@ -53,30 +53,27 @@ func! rainbow#load(...)
         cal rainbow#clear()
     endif
     let b:loaded = (a:0 < 1) ? [['(',')'],['\[','\]'],['{','}']] : a:1
-    let b:operators = (a:0 < 2) ? '' : a:2
+    if b:loaded == []
+        unlet b:loaded
+        return
+    endif
     let str = 'TOP'
     for each in range(1, s:max)
         let str .= ',lv'.each
     endfor
-    if b:operators == '' && exists('g:rainbow_operators') && g:rainbow_operators > 0
-        let tmp = ['","' , '"[-+*/%><&|=,]\{1,2} "']
-        let b:operators = tmp[min([len(tmp) - 1 , g:rainbow_operators - 1])]
-    endif
     let cmd = 'syn region %s matchgroup=%s start=+%s+ end=+%s+ containedin=%s contains=%s,%s'
-    let cmd2 = 'syn match %s %s containedin=%s contained'
     for [left , right] in b:loaded
         for each in range(1, s:max - 1)
-            if b:operators != ''
-                exe printf(cmd2, 'op_lv'.each, b:operators, 'lv'.each)
-            endif
             exe printf(cmd, 'lv'.each, 'lv'.each.'c', left, right, 'lv'.(each+1) , str , 'op_lv'.each)
         endfor
-        if b:operators != ''
-            exe printf(cmd2, 'op_lv'.s:max, b:operators, 'lv'.s:max)
-        endif
         exe printf(cmd, 'lv'.s:max, 'lv'.s:max.'c', left, right, 'lv1' , str , 'op_lv'.s:max)
     endfor
-    cal rainbow#activate()
+    for id in range(1 , s:max)
+        let ctermfg = s:ctermfgs[(s:max - id) % len(s:ctermfgs)]
+        let guifg = s:guifgs[(s:max - id) % len(s:guifgs)]
+        exe 'hi default lv'.id.'c ctermfg='.ctermfg.' guifg='.guifg
+        exe 'hi default op_lv'.id.' ctermfg='.ctermfg.' guifg='.guifg
+    endfor
 endfunc
 
 func! rainbow#clear()
@@ -85,39 +82,6 @@ func! rainbow#clear()
         exe 'syn clear lv'.each
         exe 'syn clear op_lv'.each
     endfor
-endfunc
-
-func! rainbow#activate()
-    if !exists('b:loaded')
-        cal rainbow#load()
-        return
-    endif
-    for id in range(1 , s:max)
-        let ctermfg = s:ctermfgs[(s:max - id) % len(s:ctermfgs)]
-        let guifg = s:guifgs[(s:max - id) % len(s:guifgs)]
-        exe 'hi default lv'.id.'c ctermfg='.ctermfg.' guifg='.guifg
-        exe 'hi default op_lv'.id.' ctermfg='.ctermfg.' guifg='.guifg
-    endfor
-    let b:active = 'active'
-endfunc
-
-func! rainbow#inactivate()
-    if exists('b:active')
-        for each in range(1, s:max)
-            exe 'hi clear lv'.each.'c'
-            exe 'hi clear op_lv'.each.''
-        endfor
-        unlet b:active
-    endif
-    " syntax off | syntax on
-endfunc
-
-func! rainbow#toggle()
-    if exists('b:active')
-        cal rainbow#inactivate()
-    else
-        cal rainbow#activate()
-    endif
 endfunc
 
 func! rainbow#toggle_load()
@@ -133,17 +97,12 @@ if exists('g:rainbow_active') && g:rainbow_active
         let ps = g:rainbow_load_separately
         for i in range(len(ps))
             if len(ps[i]) < 3
-                exe printf('auto syntax,bufnewfile,bufreadpost %s call rainbow#load(ps[%d][1])' , ps[i][0] , i)
-            else
-                exe printf('auto syntax,bufnewfile,bufreadpost %s call rainbow#load(ps[%d][1] , ps[%d][2])' , ps[i][0] , i , i)
+                exe printf('auto BufNewFile,BufReadPost %s call rainbow#load(ps[%d][1])' , ps[i][0] , i)
             endif
         endfor
     else
         auto syntax,bufnewfile,bufreadpost * call rainbow#activate()
-        "auto syntax * call rainbow#activate()
     endif
 endif
 
-command! RainbowToggle call rainbow#toggle()
 command! Rainbow call rainbow#toggle_load()
-
