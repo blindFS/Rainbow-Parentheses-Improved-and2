@@ -1,0 +1,28 @@
+*rainbowparentheses.txt*   Plugin that dynamically highlighting code blocks
+
+==============================================================================
+INTRODUCTION                                              *rainbowparentheses*
+
+This plugin highlight pairs of parentheses with different colors.
+
+Toggle command                                                      *:Rainbow*
+
+==============================================================================
+CONFIGURATION                                               *g:rainbow_active*
+
+Auto load when the 'syntax' of the buffer is set.
+
+Different rules for different 'syntax'.            *g:rainbow_load_separately*
+
+example:
+
+let g:rainbow_load_separately = [
+\   [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+\   [ 'tex' , [['(', ')'], ['\[', '\]']] ],
+\   [ 'html' , [] ],
+\   [ 'css' , [] ],
+\   [ 'mkd', [] ],
+\   [ 'vimwiki', [] ],
+\   ]
+
+An empty list means it is disabled by default for that 'syntax'.

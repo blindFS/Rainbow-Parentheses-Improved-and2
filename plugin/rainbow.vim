@@ -103,7 +103,7 @@ if exists('g:rainbow_active') && g:rainbow_active
             endif
         endfor
     else
-        auto syntax * call rainbow#activate()
+        auto syntax * call rainbow#load()
     endif
 endif
 
