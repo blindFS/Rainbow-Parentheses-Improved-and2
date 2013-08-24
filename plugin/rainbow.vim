@@ -22,15 +22,14 @@
 "
 "           let g:rainbow_load_separately = [
 "           \   [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-"           \   [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
-"           \   [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-"           \   [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
+"           \   [ 'tex' , [['(', ')'], ['\[', '\]']] ],
+"           \   [ 'cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+"           \   [ 'html' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
 "           \   ]
 "
 "           let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick',]
 "
 "User Command:
-"   :RainbowToggle      --you can use it to toggle this plugin.
 "   :Rainbow            --you can use it to toggle this plugin.
 
 
@@ -77,6 +76,9 @@ func! rainbow#load(...)
 endfunc
 
 func! rainbow#clear()
+    if !exists('b:loaded')
+        return
+    endif
     unlet b:loaded
     for each in range(1 , s:max)
         exe 'syn clear lv'.each
@@ -84,7 +86,7 @@ func! rainbow#clear()
     endfor
 endfunc
 
-func! rainbow#toggle_load()
+func! rainbow#toggle()
     if exists('b:loaded')
         cal rainbow#clear()
     else
@@ -97,12 +99,12 @@ if exists('g:rainbow_active') && g:rainbow_active
         let ps = g:rainbow_load_separately
         for i in range(len(ps))
             if len(ps[i]) < 3
-                exe printf('auto BufNewFile,BufReadPost %s call rainbow#load(ps[%d][1])' , ps[i][0] , i)
+                exe printf('auto Syntax %s call rainbow#load(ps[%d][1])' , ps[i][0] , i)
             endif
         endfor
     else
-        auto syntax,bufnewfile,bufreadpost * call rainbow#activate()
+        auto syntax * call rainbow#activate()
     endif
 endif
 
-command! Rainbow call rainbow#toggle_load()
+command! Rainbow call rainbow#toggle()
