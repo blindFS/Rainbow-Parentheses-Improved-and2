@@ -60,18 +60,17 @@ func! rainbow#load(...)
     for each in range(1, s:max)
         let str .= ',lv'.each
     endfor
-    let cmd = 'syn region %s matchgroup=%s start=+%s+ end=+%s+ containedin=%s contains=%s,%s'
+    let cmd = 'syn region %s matchgroup=%s start=+%s+ end=+%s+ containedin=%s contains=%s'
     for [left , right] in b:loaded
         for each in range(1, s:max - 1)
-            exe printf(cmd, 'lv'.each, 'lv'.each.'c', left, right, 'lv'.(each+1) , str , 'op_lv'.each)
+            exe printf(cmd, 'lv'.each, 'lv'.each.'c', left, right, 'lv'.(each+1) , str)
         endfor
-        exe printf(cmd, 'lv'.s:max, 'lv'.s:max.'c', left, right, 'lv1' , str , 'op_lv'.s:max)
+        exe printf(cmd, 'lv'.s:max, 'lv'.s:max.'c', left, right, 'lv1' , str)
     endfor
     for id in range(1 , s:max)
         let ctermfg = s:ctermfgs[(s:max - id) % len(s:ctermfgs)]
         let guifg = s:guifgs[(s:max - id) % len(s:guifgs)]
         exe 'hi default lv'.id.'c ctermfg='.ctermfg.' guifg='.guifg
-        exe 'hi default op_lv'.id.' ctermfg='.ctermfg.' guifg='.guifg
     endfor
 endfunc
 
@@ -82,7 +81,6 @@ func! rainbow#clear()
     unlet b:loaded
     for each in range(1 , s:max)
         exe 'syn clear lv'.each
-        exe 'syn clear op_lv'.each
     endfor
 endfunc
 
